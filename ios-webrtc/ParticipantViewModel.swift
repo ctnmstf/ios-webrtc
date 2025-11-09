@@ -1,0 +1,61 @@
+import Foundation
+import UIKit
+
+@MainActor
+class ParticipantViewModel: ObservableObject {
+    
+    private let webRTCManager = WebRTCManager()
+    let currentPeer: WebRTCManager.peer
+    let chatRoomId: String
+    
+    init(chatRoomId: String, currentPeer: WebRTCManager.peer) {
+        self.chatRoomId = chatRoomId
+        self.currentPeer = currentPeer
+    }
+    
+    var connectionState: AsyncStream<WebRTCManager.webRTCManagerConnectionState> {
+        webRTCManager.connectionState
+    }
+    var connectionStateInfo: AsyncStream<String> {
+        webRTCManager.connectionStateInfo
+    }
+    
+    deinit {
+        print("WebRTCManager ParticipantViewModel deinit")
+    }
+    
+    func retryConnect() async {
+        await webRTCManager.retryConnect(chatRoomId: chatRoomId, currentPeer: currentPeer)
+    }
+    
+    func rtcRemoteViewInit(uiView: UIView,containerSize: CGSize) -> UIView {
+        let view = webRTCManager.renderRemoteVideo(frame: CGRect(origin: CGPoint(x: 0, y: 0), size: containerSize))!
+        webRTCManager.startCaptureLocalVideo()
+        return view
+    }
+    
+    func rtcLocalViewInit(uiView: UIView,containerSize: CGSize) -> UIView {
+        let view = webRTCManager.renderLocalVideo(frame: CGRect(origin: CGPoint(x: 0, y: 0), size: containerSize))!
+        return view
+    }
+    
+    func muteAudio() {
+        webRTCManager.muteAudio()
+    }
+    
+    func unmuteAudio() {
+        webRTCManager.unmuteAudio()
+    }
+    
+    func showVideo() {
+        webRTCManager.showVideo()
+    }
+    
+    func hideVideo() {
+        webRTCManager.hideVideo()
+    }
+    
+    func endCall() {
+        webRTCManager.endCall()
+    }
+}
